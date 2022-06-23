@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  tg-bot:
+    container_name: tg-bot
+    image: registry.bkxtech.com/defi-tg-bot:main
+    command: /go/src/tg-bot/bot
+    restart: always
+    network_mode: host
+    volumes:
+      - ./cfg/bot/config.yaml:/go/src/tg-bot/config.yaml
