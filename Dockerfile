@@ -1,7 +1,8 @@
-FROM golang:1.17-alpine
+FROM golang:1.17.3-alpine3.15 as Builder
+COPY . /go/src/tg-bot
+WORKDIR /go/src/tg-bot
+RUN go mod tidy -compat=1.17
+RUN go build -o /go/src/tg-bot/bin/bot
 
-RUN apk update && apk add --no-cache git ca-certificates && update-ca-certificates
-WORKDIR /go/src/tg-bot/
-COPY . .
-RUN go get -d -v
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags nethttpomithttp2 -ldflags="-w -s" -o /go/src/tg-bot/bot
+FROM alpine:3.15
+COPY --from=Builder /go/src/tg-bot/bin/* /go/src/tg-bot/

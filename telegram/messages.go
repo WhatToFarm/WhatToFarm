@@ -19,3 +19,7 @@ func (bot *TgBot) sendMessage(ID int64, message func() string) {
 func wrong() string {
 	return fmt.Sprintf("Something wrong, try again")
 }
+
+func invalidFormat() string {
+	return fmt.Sprintf("Invalid file format, expected \"%s\"", defaultExt)
+}

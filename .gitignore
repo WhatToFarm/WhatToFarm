@@ -5,6 +5,8 @@
 .mongo
 config.yaml
 .env
+assets
+mongo-volume
 
 # Test binary, built with `go test -c`
 *.test

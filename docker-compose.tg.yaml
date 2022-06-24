@@ -1,11 +1,24 @@
 version: "3"
 
 services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    volumes:
+      - ./mongo-volume:/data/db
+    ports:
+      - '27017:27017'
+
   tg-bot:
-    container_name: tg-bot
-    image: registry.bkxtech.com/defi-tg-bot:main
-    command: /go/src/tg-bot/bot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: bot
+    environment:
+      PATH: /
+    command: bot
     restart: always
     network_mode: host
     volumes:
-      - ./cfg/bot/config.yaml:/go/src/tg-bot/config.yaml
+      - ./config.yaml:/config.yaml
+      - ./assets/:/assets/

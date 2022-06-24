@@ -6,10 +6,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-//type T struct {
-//	M *fsm.Machine
-//}
-
 type TgBot struct {
 	api    *tgbotapi.BotAPI
 	states map[int64]*models.TgUser
@@ -39,6 +35,9 @@ func (bot *TgBot) init(botID string, logID int64) {
 	updates, _ := bot.api.GetUpdatesChan(u)
 
 	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
 		go bot.extractData(update.Message)
 	}
 }
