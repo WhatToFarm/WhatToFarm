@@ -24,11 +24,11 @@ func ValidateGitHub(userName string, userID int64) error {
 	}
 
 	if data.Message == models.NotFound {
-		return fmt.Errorf("user %w", ErrNotFound)
+		return fmt.Errorf("GitHub user %s %w", userName, ErrNotFound)
 	}
 
 	if data.CreatedAt.After(time.Now().Add(-1 * month)) {
-		return ErrNewUser
+		return fmt.Errorf("GitHub user %s %w", userName, ErrNewUser)
 	}
 
 	url = fmt.Sprintf(pathRepo, userName)
@@ -38,7 +38,7 @@ func ValidateGitHub(userName string, userID int64) error {
 	}
 
 	if data.Message == models.NotFound {
-		return fmt.Errorf("repo %w", ErrNotFound)
+		return fmt.Errorf("repo TCS2: %w", ErrNotFound)
 	}
 
 	return nil

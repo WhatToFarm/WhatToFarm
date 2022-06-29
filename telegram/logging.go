@@ -6,7 +6,7 @@ import (
 	"ton-tg-bot/logger"
 )
 
-func (bot *TgBot) ForwardMessage(message *tgbotapi.Message) {
+func (bot *TgBot) forwardMessage(message *tgbotapi.Message) {
 	logMsg := fmt.Sprintf("<b>New message from: %d, @%s</b>\n%s", message.From.ID, message.From.UserName, message.Text)
 	fmt.Println(bot.logID)
 	msg := tgbotapi.NewMessage(bot.logID, logMsg)
@@ -17,7 +17,7 @@ func (bot *TgBot) ForwardMessage(message *tgbotapi.Message) {
 	}
 }
 
-func (bot *TgBot) LogToGroup(message *tgbotapi.Message, text string) {
+func (bot *TgBot) logToGroup(message *tgbotapi.Message, text string) {
 	logMsg := fmt.Sprintf("<b>Log. User: %d, @%s</b>\n%s", message.From.ID, message.From.UserName, text)
 	fmt.Println(bot.logID)
 	msg := tgbotapi.NewMessage(bot.logID, logMsg)

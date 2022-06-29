@@ -1,9 +1,22 @@
 package github
 
 import (
+	"errors"
 	"net"
 	"net/http"
 	"time"
+)
+
+const (
+	pathUser = "https://api.github.com/users/%s"
+	pathRepo = "https://api.github.com/repos/%s/TCS2"
+
+	month = time.Hour * 24 * 30
+)
+
+var (
+	ErrNotFound = errors.New("not found")
+	ErrNewUser  = errors.New("registered less than a month")
 )
 
 func newTransport() *http.Transport {

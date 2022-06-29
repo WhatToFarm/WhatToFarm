@@ -2,3 +2,6 @@
 .mongo
 .idea
 mongo-volume
+assets
+config.yaml
+config.example.yaml

@@ -33,24 +33,36 @@ func isBot() string {
 }
 
 func toManyAttempts(minutes int64) string {
-	return fmt.Sprintf("Sorry, you have only 5 attempts per hour."+
+	return fmt.Sprintf("Sorry, you have only 5 attempts per hour.\n"+
 		"Next time you can try in <b>%d minutes</b>.", minutes)
 }
 
-func validateUser() string {
+func validationUser() string {
 	return "You need authorize your GitHub account in bot."
 }
 
-func validateStepOne() string {
+func validationStepOne() string {
 	return "Your GitHub account should be created a month ago minimum.\n" +
 		"It's important!\n\n" +
 		"Create public repository named <b>\"TCS2\"</b> in your GitHub. It may be empty.\n" +
 		"So, send me your GitHub account name after this message.\n" +
-		"If everything is OK, I will let you know!."
+		"I will let you know next steps!."
 }
 
-func validateFailed(err string) string {
+func validationFailed(err string) string {
 	return fmt.Sprintf("I can't register your account.\n"+
 		"Error: %s\n"+
 		"Please, try again", err)
+}
+
+func validationSuccess() string {
+	return "Everything is OK!\n" +
+		"You can send me your solution or questions."
+}
+
+func description() string {
+	return "You have validated your GitHug account and can continue.\n" +
+		"You can send me your solution or questions.\n\n" +
+		"Your solution must include only <b>tar.gz</b> archive file.\n" +
+		"If you have any questions, message me. And specialist from our teem contact you."
 }

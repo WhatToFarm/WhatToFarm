@@ -7,7 +7,9 @@ type ErrMessage string
 const (
 	NotFound ErrMessage = "Not Found"
 
-	FieldAccount = "gitAccount"
+	FieldAccount  = "gitAccount"
+	FieldTS       = "ts"
+	FieldAttempts = "attempts"
 )
 
 type Data struct {

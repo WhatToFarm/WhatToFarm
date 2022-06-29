@@ -1,58 +1,61 @@
 package telegram
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 	"ton-tg-bot/core"
+	"ton-tg-bot/external"
 	"ton-tg-bot/logger"
+	"ton-tg-bot/models"
+	"ton-tg-bot/mongo"
 )
 
 const (
-	basePath   = "https://api.telegram.org/file/bot%s/%s"
-	defaultExt = ".tar.gz"
+	tgApiGetFile = "https://api.telegram.org/file/bot%s/%s"
+	defaultExt   = ".tar.gz"
 )
 
 var (
 	ErrInvalidFileFormat = errors.New("invalid file format")
-	ErrInternal          = errors.New("internal error")
 	ErrToManyAttempts    = errors.New("many attempts")
 )
 
-func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, userID int64) {
-	if err := bot.checkAttempt(userID); err != nil {
+func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, user *models.TgUser) {
+	if err := bot.checkAttempt(user); err != nil {
 		return
 	}
 
-	err := bot.getFile(message)
-	if errors.Is(err, ErrInvalidFileFormat) {
-		bot.sendMessage(userID, invalidFormat)
-		return
-	} else if err != nil {
-		bot.sendMessage(userID, wrong)
+	resp, err := bot.handleFile(message)
+	if err != nil {
+		if errors.Is(err, ErrInvalidFileFormat) {
+			logger.LogWarn(err)
+			bot.sendMessage(user.TgId, invalidFormat)
+			return
+		}
+		logger.LogError(err)
+		bot.sendMessage(user.TgId, wrong)
 		return
 	}
+
+	if err = mongo.UpdateUser(user); err != nil {
+		logger.LogWarn("Update user attempts:", err)
+	}
+	bot.sendMessage(user.TgId, func() string { return resp })
 }
 
-func (bot *TgBot) checkAttempt(userID int64) error {
-	user, ok := bot.users[userID]
-	if !ok {
-		bot.sendMessage(userID, wrong)
-		logger.LogError("user not added to bot cache", userID)
-		return ErrInternal
-	}
-
+func (bot *TgBot) checkAttempt(user *models.TgUser) error {
 	timeLimit := time.Now().UTC().Add(-1 * time.Hour)
 	if user.Attempts == 5 && user.TS.After(timeLimit) {
-		next := timeLimit.Unix() - user.TS.Unix()
-		bot.sendMessage(userID, func() string {
-			return toManyAttempts(next)
-		})
+		next := (user.TS.Unix() - timeLimit.Unix()) / 60
+		bot.sendMessage(user.TgId, func() string { return toManyAttempts(next) })
 		return ErrToManyAttempts
 	}
 
@@ -66,23 +69,20 @@ func (bot *TgBot) checkAttempt(userID int64) error {
 	return nil
 }
 
-func (bot *TgBot) getFile(message *tgbotapi.Message) error {
+func (bot *TgBot) handleFile(message *tgbotapi.Message) (string, error) {
 	tgFile, err := bot.api.GetFile(tgbotapi.FileConfig{FileID: message.Document.FileID})
 	if err != nil {
-		logger.LogError("get file data:", err)
-		return err
+		return "", fmt.Errorf("get file data: %w", err)
 	}
 
 	pathToFile, err := path(message)
 	if err != nil {
-		logger.LogError("get file data:", err)
-		return err
+		return "", fmt.Errorf("file path: %w", err)
 	}
 
 	file, err := os.OpenFile(pathToFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		logger.LogError("file create:", err)
-		return err
+		return "", fmt.Errorf("file create: %w", err)
 	}
 	defer func() {
 		if errFile := file.Close(); errFile != nil {
@@ -90,8 +90,20 @@ func (bot *TgBot) getFile(message *tgbotapi.Message) error {
 		}
 	}()
 
-	url := fmt.Sprintf(basePath, core.BotId, tgFile.FilePath)
-	return getFileFromURL(url, file)
+	url := fmt.Sprintf(tgApiGetFile, core.BotId, tgFile.FilePath)
+	if err = getFileFromURL(url, file); err != nil {
+		return "", fmt.Errorf("get file from telegramm: %w", err)
+	}
+
+	buf := bytes.NewBufferString("")
+	if _, err = io.Copy(buf, file); err != nil {
+		return "", fmt.Errorf("file copy: %w", err)
+	}
+	ans, err := external.ExtService(filepath.Base(pathToFile), buf)
+	if err != nil {
+		return "", fmt.Errorf("external service: %w", err)
+	}
+	return ans, nil
 }
 
 func path(message *tgbotapi.Message) (string, error) {
@@ -104,8 +116,7 @@ func path(message *tgbotapi.Message) (string, error) {
 func getFileFromURL(url string, file *os.File) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		logger.LogError("file download:", err)
-		return err
+		return fmt.Errorf("file download: %w", err)
 	}
 	defer func() {
 		if errBody := resp.Body.Close(); errBody != nil {
@@ -115,7 +126,8 @@ func getFileFromURL(url string, file *os.File) error {
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		logger.LogError("resp body copy:", err)
+		return fmt.Errorf("resp body copy: %w", err)
 	}
-	return err
+
+	return nil
 }

@@ -8,8 +8,11 @@ services:
       - ./mongo-volume:/data/db
     ports:
       - '27017:27017'
+    command: mongod --quiet --logpath /dev/null
 
   tg-bot:
+    depends_on:
+      - mongo
     build:
       context: .
       dockerfile: ./Dockerfile
