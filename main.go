@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/spf13/viper"
 	"os"
 	"os/signal"
+
+	"github.com/spf13/viper"
+
 	"ton-tg-bot/core"
 	"ton-tg-bot/logger"
 	"ton-tg-bot/mongo"

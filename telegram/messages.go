@@ -2,7 +2,9 @@ package telegram
 
 import (
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"ton-tg-bot/logger"
 )
 

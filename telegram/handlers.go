@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"ton-tg-bot/core"
 	"ton-tg-bot/external"
 	"ton-tg-bot/logger"

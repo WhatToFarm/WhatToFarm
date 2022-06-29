@@ -2,6 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"ton-tg-bot/logger"
 	"ton-tg-bot/models"
 )
