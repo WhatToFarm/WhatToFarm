@@ -3,8 +3,13 @@
 ## first stage
 rename _config.example.yaml_ to _config.yaml_
 
-add your personal info to _config.yaml_: botID and your account ID for logging
+add your personal info to _config.yaml_: 
+1. botID
+2. your account ID for logging (person or group)
+3. host and path of your service
 
 ## second stage
 
-docker-compose -f docker-compose.tg.yaml up
+turn on your service and add one in docker-compose
+
+check dot UX and be happy!

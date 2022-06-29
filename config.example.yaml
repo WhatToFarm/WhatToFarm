@@ -1,9 +1,12 @@
 mongo:
-  url: mongodb://mongo:27017
+  url: mongodb://localhost:27017
   database: tg-bot
 log:
-  level: debug
-  #graylog: 94.130.18.58:12201
+#  level: debug
 telegram:
-    bot_id: 5065707701:AAH_xPxG_fDLPb3p3OM7Oo
-    log_id: 00000000000
+  bot_id: 5065707701:AAH_xPxG_fDLPb3p3OM7Oo-0000000000
+  log_id: 0000000000
+
+service:
+  host: 127.0.0.1:5000
+  base_path: /api/runtests/
