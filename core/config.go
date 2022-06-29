@@ -1,8 +1,8 @@
 package core
 
 import (
-	"ext-tg-bot/utils"
 	"github.com/spf13/viper"
+	"ton-tg-bot/logger"
 )
 
 var (
@@ -11,28 +11,37 @@ var (
 	LogLevel      string
 	BotId         string
 	LogId         int64
+	Host          string
+	Port          string
+	BasePath      string
 )
 
 func Init() {
 	MongoURL = viper.GetString("mongo.url")
 	MongoDatabase = viper.GetString("mongo.database")
 	LogLevel = viper.GetString("log.level")
+	Host = viper.GetString("service.host")
+	Port = viper.GetString("service.port")
+	BasePath = viper.GetString("service.base_path")
 
 	BotId = viper.GetString("telegram.bot_id")
 	if BotId == "" {
-		utils.LogFatal("Telegram bot ID not provided")
+		logger.LogFatal("Telegram bot ID not provided")
 	}
 
 	LogId = viper.GetInt64("telegram.log_id")
 	if LogId == 0 {
-		utils.LogFatal("Telegram log ID not provided")
+		logger.LogFatal("Telegram log ID not provided")
 	}
 
-	utils.LogInfo("CFG: MongoURL = ", MongoURL)
-	utils.LogInfo("CFG: MongoDatabase = ", MongoDatabase)
-	utils.LogInfo("CFG: LogLevel = ", LogLevel)
-	utils.LogInfo("CFG: Telegram BotId = ", BotId)
-	utils.LogInfo("CFG: Telegram LogId = ", LogId)
+	logger.LogInfo("CFG: MongoURL = ", MongoURL)
+	logger.LogInfo("CFG: MongoDatabase = ", MongoDatabase)
+	logger.LogInfo("CFG: LogLevel = ", LogLevel)
+	logger.LogInfo("CFG: Telegram BotId = ", BotId)
+	logger.LogInfo("CFG: Telegram LogId = ", LogId)
+	logger.LogInfo("CFG: Service host = ", Host)
+	logger.LogInfo("CFG: Service host = ", Port)
+	logger.LogInfo("CFG: Service base path = ", BasePath)
 
-	utils.LogLevel = LogLevel
+	logger.LogLevel = LogLevel
 }

@@ -2,11 +2,16 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"ext-tg-bot/utils"
+	"ton-tg-bot/logger"
+)
+
+const (
+	userCollection = "user"
 )
 
 var (
@@ -16,17 +21,21 @@ var (
 )
 
 // Init initializes Mongo DB connection
-func Init(ctx context.Context, mongoURL string, mongoDB string) error {
+func Init(ctx context.Context, mongoURL, mongoDB string) error {
 	var err error
 	_ctx = ctx
 
-	utils.LogInfo("Starting Mongo:", mongoURL)
+	logger.LogInfo("Starting Mongo:", mongoURL)
 
 	_mongoClient, err = mongo.Connect(_ctx, options.Client().ApplyURI(mongoURL))
 	if err != nil {
-		return err
+		return fmt.Errorf("mongoDB connect: %w", err)
 	}
 	_mongoDB = _mongoClient.Database(mongoDB)
+
+	if err = createIndex(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -35,6 +44,6 @@ func Init(ctx context.Context, mongoURL string, mongoDB string) error {
 func Close() {
 	err := _mongoClient.Disconnect(_ctx)
 	if err != nil {
-		utils.LogError(err)
+		logger.LogError(err)
 	}
 }

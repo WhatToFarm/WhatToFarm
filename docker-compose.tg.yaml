@@ -15,7 +15,7 @@ services:
       dockerfile: ./Dockerfile
     container_name: bot
     environment:
-      PATH: /
+      PATH: /go/src/tg-bot
     command: bot
     restart: always
     network_mode: host
