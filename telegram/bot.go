@@ -3,6 +3,7 @@ package telegram
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"strings"
+	"ton-tg-bot/github"
 	"ton-tg-bot/logger"
 	"ton-tg-bot/models"
 	"ton-tg-bot/mongo"
@@ -46,8 +47,17 @@ func (bot *TgBot) checkState(message *tgbotapi.Message, userData *models.TgUser)
 
 func (bot *TgBot) parseGitHubName(message *tgbotapi.Message, userData *models.TgUser) {
 	userData.GitAccount = strings.TrimSpace(message.Text)
+	if err := github.ValidateGitHub(userData.GitAccount, userData.TgId); err != nil {
+		logger.LogWarn("GitHub validation user:", userData.TgId, "error:", err)
+		bot.sendMessage(userData.TgId, func() string {
+			return validateFailed(err.Error())
+		})
+		userData.State = StateValidation
+		return
+	}
 	userData.State = StateInitiated
 	if err := mongo.CreateUser(userData); err != nil {
+		logger.LogWarn("GitHub validation user:", userData.TgId, "error:", err)
 		bot.sendMessage(userData.TgId, func() string {
 			return validateFailed(err.Error())
 		})
