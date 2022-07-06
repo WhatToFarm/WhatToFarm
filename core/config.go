@@ -9,20 +9,16 @@ import (
 var (
 	MongoURL      string
 	MongoDatabase string
-	LogLevel      string
 	BotId         string
 	LogId         int64
 	Host          string
-	Port          string
 	BasePath      string
 )
 
 func Init() {
 	MongoURL = viper.GetString("mongo.url")
 	MongoDatabase = viper.GetString("mongo.database")
-	LogLevel = viper.GetString("log.level")
 	Host = viper.GetString("service.host")
-	Port = viper.GetString("service.port")
 	BasePath = viper.GetString("service.base_path")
 
 	BotId = viper.GetString("telegram.bot_id")
@@ -37,12 +33,8 @@ func Init() {
 
 	logger.LogInfo("CFG: MongoURL = ", MongoURL)
 	logger.LogInfo("CFG: MongoDatabase = ", MongoDatabase)
-	logger.LogInfo("CFG: LogLevel = ", LogLevel)
 	logger.LogInfo("CFG: Telegram BotId = ", BotId)
 	logger.LogInfo("CFG: Telegram LogId = ", LogId)
 	logger.LogInfo("CFG: Service host = ", Host)
-	logger.LogInfo("CFG: Service host = ", Port)
 	logger.LogInfo("CFG: Service base path = ", BasePath)
-
-	logger.LogLevel = LogLevel
 }
