@@ -46,7 +46,8 @@ func bigFileSize() string {
 func validationStepOne() string {
 	return "Your GitHub account should be created a month ago minimum.\n" +
 		"It's important!\n\n" +
-		"Create public repository named <b>\"TCS2-your_tg_id\"</b> in your GitHub. It may be empty.\n" +
+		"Create public repository named <b>\"TCS2-your_tg_id\"</b> " +
+		"(for example TCS2-1234567890) in your GitHub. It may be empty.\n" +
 		"So, send me your GitHub account name after this message.\n" +
 		"I will let you know next steps!."
 }
