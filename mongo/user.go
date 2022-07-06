@@ -1,7 +1,9 @@
 package mongo
 
 import (
+	"errors"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -12,6 +14,9 @@ import (
 func CreateUser(user *models.TgUser) error {
 	_, err := _mongoDB.Collection(userCollection).InsertOne(_ctx, user)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return errors.New("user already exists")
+		}
 		return err
 	}
 	return nil

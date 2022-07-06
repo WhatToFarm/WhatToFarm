@@ -8,24 +8,20 @@ import (
 	"ton-tg-bot/logger"
 )
 
-func (bot *TgBot) forwardMessage(message *tgbotapi.Message) {
-	logMsg := fmt.Sprintf("<b>New message from: %d, @%s</b>\n%s", message.From.ID, message.From.UserName, message.Text)
-	fmt.Println(bot.logID)
+func (bot *TgBot) logText(message *tgbotapi.Message, text string) {
+	logMsg := fmt.Sprintf("<b>Log. User: %d, @%s</b>\n%s", message.From.ID, message.From.UserName, text)
 	msg := tgbotapi.NewMessage(bot.logID, logMsg)
 	msg.ParseMode = tgbotapi.ModeHTML
 	_, err := bot.api.Send(msg)
 	if err != nil {
-		logger.LogWarn("message to:", message.From.ID, err)
+		logger.LogWarn("message to log chat:", err)
 	}
 }
 
-func (bot *TgBot) logToGroup(message *tgbotapi.Message, text string) {
-	logMsg := fmt.Sprintf("<b>Log. User: %d, @%s</b>\n%s", message.From.ID, message.From.UserName, text)
-	fmt.Println(bot.logID)
-	msg := tgbotapi.NewMessage(bot.logID, logMsg)
-	msg.ParseMode = tgbotapi.ModeHTML
+func (bot *TgBot) logForward(message *tgbotapi.Message) {
+	msg := tgbotapi.NewForward(bot.logID, message.Chat.ID, message.MessageID)
 	_, err := bot.api.Send(msg)
 	if err != nil {
-		logger.LogWarn("message to:", message.From.ID, err)
+		logger.LogWarn("message to log chat:", err)
 	}
 }

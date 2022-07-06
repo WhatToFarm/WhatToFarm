@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -25,10 +26,6 @@ func (bot *TgBot) extractData(message *tgbotapi.Message) {
 		return
 	}
 
-	logger.LogDebug("extractData: ", message.From.UserName, message.Text)
-	if message.Text != "" {
-	}
-
 	user := bot.users[message.Chat.ID]
 	if user == nil {
 		user = &models.TgUser{
@@ -44,7 +41,6 @@ func (bot *TgBot) extractData(message *tgbotapi.Message) {
 func (bot *TgBot) checkState(message *tgbotapi.Message, user *models.TgUser) {
 	switch user.State {
 	case StateValidation:
-		bot.sendMessage(user.TgId, validationUser)
 		bot.sendMessage(user.TgId, validationStepOne)
 		user.State = StateValidateGitHub
 	case StateValidateGitHub:
@@ -64,7 +60,6 @@ func (bot *TgBot) parseGitHubName(message *tgbotapi.Message, user *models.TgUser
 		user.State = StateValidation
 		return
 	}
-	user.State = StateInitiated
 	if err := mongo.CreateUser(user); err != nil {
 		logger.LogWarn("GitHub validation user:", user.TgId, "error:", err)
 		bot.sendMessage(user.TgId, func() string {
@@ -73,7 +68,10 @@ func (bot *TgBot) parseGitHubName(message *tgbotapi.Message, user *models.TgUser
 		user.State = StateValidation
 		return
 	}
+
+	user.State = StateInitiated
 	bot.sendMessage(user.TgId, validationSuccess)
+	bot.logText(message, fmt.Sprintf("GitHub user <code>github.com/%s</code> registered", message.Text))
 }
 
 func (bot *TgBot) parseMessage(message *tgbotapi.Message, user *models.TgUser) {
@@ -84,7 +82,7 @@ func (bot *TgBot) parseMessage(message *tgbotapi.Message, user *models.TgUser) {
 	case message.Document != nil:
 		bot.handleFileUpload(message, user)
 	case message.Text != "":
-		bot.forwardMessage(message)
+		bot.logForward(message)
 		bot.sendMessage(user.TgId, answer)
 	}
 }
