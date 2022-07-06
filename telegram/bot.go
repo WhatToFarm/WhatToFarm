@@ -41,7 +41,7 @@ func (bot *TgBot) extractData(message *tgbotapi.Message) {
 func (bot *TgBot) checkState(message *tgbotapi.Message, user *models.TgUser) {
 	switch user.State {
 	case StateValidation:
-		bot.sendMessage(user.TgId, validationStepOne)
+		bot.sendMessage(user.TgId, func() string { return validationStepOne(user.TgId) })
 		user.State = StateValidateGitHub
 	case StateValidateGitHub:
 		bot.parseGitHubName(message, user)
