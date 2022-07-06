@@ -23,11 +23,14 @@ import (
 const (
 	tgApiGetFile = "https://api.telegram.org/file/bot%s/%s"
 	defaultExt   = ".tar.gz"
+
+	maxFileSie = 1_000_000
 )
 
 var (
 	ErrInvalidFileFormat = errors.New("invalid file format")
-	ErrToManyAttempts    = errors.New("many attempts")
+	ErrManyAttempts      = errors.New("many attempts")
+	ErrBigSize           = errors.New("big file size")
 )
 
 func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, user *models.TgUser) {
@@ -37,19 +40,25 @@ func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, user *models.TgUse
 
 	resp, err := bot.handleFile(message)
 	if err != nil {
-		if errors.Is(err, ErrInvalidFileFormat) {
+		switch {
+		case errors.Is(err, ErrInvalidFileFormat):
 			logger.LogWarn(err)
 			bot.sendMessage(user.TgId, invalidFormat)
-			return
+		case errors.Is(err, ErrBigSize):
+			logger.LogWarn(err)
+			bot.sendMessage(user.TgId, bigFileSize)
+		default:
+			logger.LogError(err)
+			bot.sendMessage(user.TgId, wrong)
 		}
-		logger.LogError(err)
-		bot.sendMessage(user.TgId, wrong)
 		return
 	}
 
 	if err = mongo.UpdateUser(user); err != nil {
 		logger.LogWarn("Update user attempts:", err)
 	}
+
+	bot.logText(message, "Response from service:\n"+resp)
 	bot.sendMessage(user.TgId, func() string { return resp })
 }
 
@@ -57,8 +66,8 @@ func (bot *TgBot) checkAttempt(user *models.TgUser) error {
 	timeLimit := time.Now().UTC().Add(-1 * time.Hour)
 	if user.Attempts == 5 && user.TS.After(timeLimit) {
 		next := (user.TS.Unix() - timeLimit.Unix()) / 60
-		bot.sendMessage(user.TgId, func() string { return toManyAttempts(next) })
-		return ErrToManyAttempts
+		bot.sendMessage(user.TgId, func() string { return manyAttempts(next) })
+		return ErrManyAttempts
 	}
 
 	if user.TS.After(timeLimit) {
@@ -75,6 +84,9 @@ func (bot *TgBot) handleFile(message *tgbotapi.Message) (string, error) {
 	tgFile, err := bot.api.GetFile(tgbotapi.FileConfig{FileID: message.Document.FileID})
 	if err != nil {
 		return "", fmt.Errorf("get file data: %w", err)
+	}
+	if tgFile.FileSize > maxFileSie {
+		return "", ErrBigSize
 	}
 
 	pathToFile, err := path(message)
@@ -96,6 +108,10 @@ func (bot *TgBot) handleFile(message *tgbotapi.Message) (string, error) {
 	if err = getFileFromURL(url, file); err != nil {
 		return "", fmt.Errorf("get file from telegramm: %w", err)
 	}
+
+	message.Text = filepath.Base(pathToFile)
+	bot.logForward(message)
+	bot.sendMessage(message.Chat.ID, waitResult)
 
 	buf := bytes.NewBufferString("")
 	if _, err = io.Copy(buf, file); err != nil {

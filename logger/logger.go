@@ -6,8 +6,6 @@ import (
 	"strconv"
 )
 
-var LogLevel string
-
 func LogFatal(v ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
@@ -61,16 +59,4 @@ func LogWarn(v ...interface{}) {
 	}
 	v = append(preI, v...)
 	log.Println(v...)
-}
-
-func LogDebug(v ...interface{}) {
-	if LogLevel == "debug" {
-		pre := []string{"\033[34m", "DEBUG: ", "\033[0m"}
-		preI := make([]interface{}, len(pre))
-		for i, s := range pre {
-			preI[i] = s
-		}
-		v = append(preI, v...)
-		log.Println(v...)
-	}
 }

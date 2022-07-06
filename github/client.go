@@ -9,7 +9,7 @@ import (
 
 const (
 	pathUser = "https://api.github.com/users/%s"
-	pathRepo = "https://api.github.com/repos/%s/TCS2"
+	pathRepo = "https://api.github.com/repos/%s/TCS2-%d"
 
 	month = time.Hour * 24 * 30
 )

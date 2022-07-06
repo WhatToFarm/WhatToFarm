@@ -32,14 +32,14 @@ func ValidateGitHub(userName string, userID int64) error {
 		return fmt.Errorf("GitHub user %s %w", userName, ErrNewUser)
 	}
 
-	url = fmt.Sprintf(pathRepo, userName)
+	url = fmt.Sprintf(pathRepo, userName, userID)
 	data, err = getGitHubData(url, userID)
 	if err != nil {
 		return err
 	}
 
 	if data.Message == models.NotFound {
-		return fmt.Errorf("repo TCS2: %w", ErrNotFound)
+		return fmt.Errorf("repo TCS2-%d: %w", userID, ErrNotFound)
 	}
 
 	return nil
