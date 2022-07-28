@@ -47,8 +47,8 @@ func validationStepOne(id int64) string {
 	return fmt.Sprintf("Your GitHub account should be created a month ago minimum.\n"+
 		"It's important!\n\n"+
 		"Create public repository named <b>\"TCS2-%d\"</b> "+
-		"(for example TCS2-1234567890) in your GitHub. It may be empty.\n"+
-		"So, send me your GitHub account name after this message.\n"+
+		"in your GitHub. It may be empty.\n"+
+		"So, send me your GitHub account name (not the link to repository) after this message.\n"+
 		"I will let you know next steps!.", id)
 }
 
@@ -72,4 +72,8 @@ func description() string {
 
 func waitResult() string {
 	return "Started solution evaluation."
+}
+
+func expireDeadline() string {
+	return "Solution acceptance is closed"
 }

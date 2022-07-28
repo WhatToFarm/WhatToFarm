@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
 
 	"ton-tg-bot/core"
 	"ton-tg-bot/logger"
@@ -15,7 +14,7 @@ import (
 func ExtService(fileName string, body io.Reader) (string, error) {
 	client := &http.Client{
 		Transport: http.DefaultTransport,
-		Timeout:   30 * time.Second,
+		Timeout:   0,
 	}
 
 	path := core.BasePath + fileName

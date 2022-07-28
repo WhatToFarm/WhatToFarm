@@ -34,6 +34,10 @@ var (
 )
 
 func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, user *models.TgUser) {
+	if !bot.checkDeadline(user) {
+		return
+	}
+
 	if err := bot.checkAttempt(user); err != nil {
 		return
 	}
@@ -62,6 +66,17 @@ func (bot *TgBot) handleFileUpload(message *tgbotapi.Message, user *models.TgUse
 	bot.sendMessage(user.TgId, func() string { return resp })
 }
 
+// checkDeadline - controls deadline.
+func (bot *TgBot) checkDeadline(user *models.TgUser) bool {
+	if time.Now().UTC().After(core.Deadline) {
+		bot.sendMessage(user.TgId, expireDeadline)
+		return false
+	}
+	return true
+}
+
+// checkAttempt - controls count of attempts.
+// Should be 5 attempts per one hour.
 func (bot *TgBot) checkAttempt(user *models.TgUser) error {
 	timeLimit := time.Now().UTC().Add(-1 * time.Hour)
 	if user.Attempts == 5 && user.TS.After(timeLimit) {

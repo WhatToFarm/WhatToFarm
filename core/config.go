@@ -1,6 +1,8 @@
 package core
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 
 	"ton-tg-bot/logger"
@@ -13,6 +15,7 @@ var (
 	LogId         int64
 	Host          string
 	BasePath      string
+	Deadline      time.Time
 )
 
 func Init() {
@@ -31,10 +34,13 @@ func Init() {
 		logger.LogFatal("Telegram log ID not provided")
 	}
 
+	Deadline = viper.GetTime("deadline")
+
 	logger.LogInfo("CFG: MongoURL = ", MongoURL)
 	logger.LogInfo("CFG: MongoDatabase = ", MongoDatabase)
 	logger.LogInfo("CFG: Telegram BotId = ", BotId)
 	logger.LogInfo("CFG: Telegram LogId = ", LogId)
 	logger.LogInfo("CFG: Service host = ", Host)
 	logger.LogInfo("CFG: Service base path = ", BasePath)
+	logger.LogInfo("CFG: Expiration time = ", Deadline)
 }
